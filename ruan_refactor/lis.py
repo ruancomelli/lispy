@@ -148,12 +148,11 @@ def evaluate(x: Expression, env: Environment) -> Any:
     match x:
         case str(_):  # variable reference
             return env[x]
+        case ["quote", exp]:  # (quote exp)
+            return exp
         case _:
             if not isinstance(x, list):  # constant literal
                 return x
-            elif x[0] == 'quote':  # (quote exp)
-                (_, exp) = x
-                return exp
             elif x[0] == 'if':  # (if test consequence alternative)
                 (_, test, consequence, alternative) = x
                 if evaluate(test, env):
