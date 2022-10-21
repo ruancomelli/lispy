@@ -10,7 +10,7 @@ import math
 import operator as op
 from collections import ChainMap
 from collections.abc import MutableMapping
-from typing import Union, Any
+from typing import Any, Union
 
 Symbol = str
 Atom = Union[float, int, Symbol]
@@ -145,28 +145,28 @@ def lispstr(exp: object) -> str:
 
 def evaluate(x: Expression, env: Environment) -> Any:
     "Evaluate an expression in an environment."
-    if isinstance(x, str):                       # variable reference
-        return env[x]
-    elif not isinstance(x, list):                # constant literal
-        return x
-    elif x[0] == 'quote':                        # (quote exp)
-        (_, exp) = x
-        return exp
-    elif (
-        x[0] == 'if'
-    ):                           # (if test consequence alternative)
-        (_, test, consequence, alternative) = x
-        if evaluate(test, env):
-            return evaluate(consequence, env)
-        else:
-            return evaluate(alternative, env)
-    elif x[0] == 'define':                       # (define var exp)
-        (_, var, exp) = x
-        env[var] = evaluate(exp, env)
-    elif x[0] == 'lambda':                       # (lambda (var...) body)
-        (_, parms, body) = x
-        return Procedure(parms, body, env)
-    else:                                        # (proc arg...)
-        proc = evaluate(x[0], env)
-        args = (evaluate(exp, env) for exp in x[1:])
-        return proc(*args)
+    match x:
+        case str(_):  # variable reference
+            return env[x]
+        case _:
+            if not isinstance(x, list):  # constant literal
+                return x
+            elif x[0] == 'quote':  # (quote exp)
+                (_, exp) = x
+                return exp
+            elif x[0] == 'if':  # (if test consequence alternative)
+                (_, test, consequence, alternative) = x
+                if evaluate(test, env):
+                    return evaluate(consequence, env)
+                else:
+                    return evaluate(alternative, env)
+            elif x[0] == 'define':  # (define var exp)
+                (_, var, exp) = x
+                env[var] = evaluate(exp, env)
+            elif x[0] == 'lambda':  # (lambda (var...) body)
+                (_, params, body) = x
+                return Procedure(params, body, env)
+            else:  # (proc arg...)
+                proc = evaluate(x[0], env)
+                args = (evaluate(exp, env) for exp in x[1:])
+                return proc(*args)
