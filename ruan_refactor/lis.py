@@ -150,15 +150,14 @@ def evaluate(x: Expression, env: Environment) -> Any:
             return env[x]
         case ["quote", exp]:  # (quote exp)
             return exp
+        case ["if", test, consequence, alternative]:  # (if test consequence alternative)
+            if evaluate(test, env):
+                return evaluate(consequence, env)
+            else:
+                return evaluate(alternative, env)
         case _:
             if not isinstance(x, list):  # constant literal
                 return x
-            elif x[0] == 'if':  # (if test consequence alternative)
-                (_, test, consequence, alternative) = x
-                if evaluate(test, env):
-                    return evaluate(consequence, env)
-                else:
-                    return evaluate(alternative, env)
             elif x[0] == 'define':  # (define var exp)
                 (_, var, exp) = x
                 env[var] = evaluate(exp, env)
