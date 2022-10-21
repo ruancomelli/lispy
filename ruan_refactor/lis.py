@@ -155,15 +155,13 @@ def evaluate(x: Expression, env: Environment) -> Any:
                 return evaluate(consequence, env)
             else:
                 return evaluate(alternative, env)
+        case ["define", var, exp]:  # (define var exp)
+            env[var] = evaluate(exp, env)
+        case ["lambda", params, body]:  # (lambda (params...) body)
+            return Procedure(params, body, env)
         case _:
             if not isinstance(x, list):  # constant literal
                 return x
-            elif x[0] == 'define':  # (define var exp)
-                (_, var, exp) = x
-                env[var] = evaluate(exp, env)
-            elif x[0] == 'lambda':  # (lambda (var...) body)
-                (_, params, body) = x
-                return Procedure(params, body, env)
             else:  # (proc arg...)
                 proc = evaluate(x[0], env)
                 args = (evaluate(exp, env) for exp in x[1:])
